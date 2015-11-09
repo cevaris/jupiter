@@ -1,5 +1,6 @@
 import boto.ec2
 
+
 class Ec2(object):
     def __init__(self):
         self.ec2_client = boto.connect_ec2()
