@@ -5,14 +5,32 @@ import dotenv  # NOQA
 dotenv.read_dotenv()  # NOQA
 
 from fabric.api import env, run, local
-from jupiter.apps.rabbitmq.package import RabbitMQDeployment
+from jupiter.apps import AppContext, HostConnection
+from jupiter.apps.rabbitmq.package import RabbitMQApp
 from jupiter.aws import Ec2
 
 env.user = os.environ.get('FABRIC_USER')
 env.key_filename = os.environ.get('FABRIC_KEY_FILENAME')
 
 services = {
-    'rabbitmq': RabbitMQDeployment
+    'rabbitmq': RabbitMQApp
+}
+
+host_connections = {
+    'abc1': AppContext(
+        'abc1',
+        'rabbitmq', [
+            HostConnection('ec2-54-85-52-212.compute-1.amazonaws.com', 'rabbitmq_node_port', '22002'),
+            HostConnection('ec2-54-85-52-212.compute-1.amazonaws.com', 'rabbitmq_management_port', '22003')
+        ]
+    ),
+    '43b2': AppContext(
+        '43b2',
+        'rabbitmq', [
+            HostConnection('ec2-54-85-52-212.compute-1.amazonaws.com', 'rabbitmq_node_port', '55490'),
+            HostConnection('ec2-54-85-52-212.compute-1.amazonaws.com', 'rabbitmq_management_port', '55489')
+        ]
+    )
 }
 
 
@@ -36,18 +54,18 @@ def bootstrap():
     job.install()
 
 
-def rabbitmq():
-    job = services['rabbitmq']
-    job.install()
+def install(service, account_slug):
+    app_context = host_connections.get(account_slug)
+    services[service](app_context).install()
 
 
-def start(service):
-    services[service]().start()
-
-
-def stop(service):
-    services[service]().stop()
-
-
-def restart(service):
-    services[service]().restart()
+# def start(service, account_slug):
+#     services[service](account_slug).start()
+#
+#
+# def stop(service, account_slug):
+#     services[service](account_slug).stop()
+#
+#
+# def restart(service, account_slug):
+#     services[service](account_slug).restart()
