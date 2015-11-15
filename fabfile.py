@@ -1,13 +1,15 @@
+import logging
 import os
-import dotenv  # NOQA
+from collections import OrderedDict
+
+import dotenv
 
 dotenv.read_dotenv()  # NOQA
 
-from fabric.api import env, run, local
+from fabric.api import env, run, local, parallel
 from jupiter.apps import AppContext, HostConnection
-from jupiter.apps.rabbitmq.package import RabbitMQApp
+from jupiter.apps.rabbitmq import RabbitMQApp
 from jupiter.aws import Ec2
-import logging
 
 logging.basicConfig()
 
@@ -19,37 +21,26 @@ services = {
 }
 
 host_connections = {
-    # 'abc1': AppContext(
-    #     'abc1',
-    #     'rabbitmq', [
-    #         HostConnection('ec2-54-85-52-212.compute-1.amazonaws.com', 'rabbitmq_node_port', '22002'),
-    #         HostConnection('ec2-54-85-52-212.compute-1.amazonaws.com', 'rabbitmq_management_port', '22003')
-    #     ]
-    # ),
-    # '43b2': AppContext(
-    #     '43b2',
-    #     'rabbitmq', [
-    #         HostConnection('ec2-54-85-52-212.compute-1.amazonaws.com', 'rabbitmq_node_port', '55490'),
-    #         HostConnection('ec2-54-85-52-212.compute-1.amazonaws.com', 'rabbitmq_management_port', '55489')
-    #     ]
-    # ),
     'xyz': AppContext(
         account_slug='xyz',
         app_name='rabbitmq',
-        host_connections=[
-            [
-                HostConnection('ec2-54-85-52-212.compute-1.amazonaws.com', 'rabbitmq_node_port', '55400'),
-                HostConnection('ec2-54-85-52-212.compute-1.amazonaws.com', 'rabbitmq_management_port', '55401')
+        host_connections=OrderedDict({
+            'ec2-52-91-224-36.compute-1.amazonaws.com': [
+                HostConnection('ec2-52-91-224-36.compute-1.amazonaws.com', 'rabbitmq_node_port', '55400'),
+                HostConnection('ec2-52-91-224-36.compute-1.amazonaws.com', 'rabbitmq_management_port', '55401'),
+                HostConnection('ec2-52-91-224-36.compute-1.amazonaws.com', 'rabbitmq_dist_port', '55402')
             ],
-            [
-                HostConnection('ec2-54-85-52-212.compute-1.amazonaws.com', 'rabbitmq_node_port', '55400'),
-                HostConnection('ec2-54-85-52-212.compute-1.amazonaws.com', 'rabbitmq_management_port', '55401')
+            'ec2-54-85-181-200.compute-1.amazonaws.com': [
+                HostConnection('ec2-54-85-181-200.compute-1.amazonaws.com', 'rabbitmq_node_port', '55400'),
+                HostConnection('ec2-54-85-181-200.compute-1.amazonaws.com', 'rabbitmq_management_port', '55401'),
+                HostConnection('ec2-52-91-224-36.compute-1.amazonaws.com', 'rabbitmq_dist_port', '55402')
             ],
-            [
+            'ec2-54-85-52-212.compute-1.amazonaws.com': [
                 HostConnection('ec2-54-85-52-212.compute-1.amazonaws.com', 'rabbitmq_node_port', '55400'),
-                HostConnection('ec2-54-85-52-212.compute-1.amazonaws.com', 'rabbitmq_management_port', '55401')
+                HostConnection('ec2-54-85-52-212.compute-1.amazonaws.com', 'rabbitmq_management_port', '55401'),
+                HostConnection('ec2-52-91-224-36.compute-1.amazonaws.com', 'rabbitmq_dist_port', '55402')
             ]
-        ]
+        })
     )
 }
 
@@ -57,7 +48,10 @@ host_connections = {
 def aws():
     ec2 = Ec2()
     env.hosts = ec2.instances_dns_names()
-    print env
+    # env.hosts = ['ec2-54-85-181-200.compute-1.amazonaws.com']
+    print 'Remote AWS Hosts'
+    for host in env.hosts:
+        print host
 
 
 def local_uname():
@@ -77,17 +71,26 @@ def bootstrap():
     Ec2Package().install()
 
 
+# @parallel(pool_size=2)
+# @parallel
 def install(service, account_slug):
     app_context = host_connections.get(account_slug)
     services[service](app_context).install()
 
-# def start(service, account_slug):
-#     services[service](account_slug).start()
-#
-#
-# def stop(service, account_slug):
-#     services[service](account_slug).stop()
-#
-#
-# def restart(service, account_slug):
-#     services[service](account_slug).restart()
+
+@parallel
+def start(service, account_slug):
+    app_context = host_connections.get(account_slug)
+    services[service](app_context).start()
+
+
+@parallel
+def restart(service, account_slug):
+    app_context = host_connections.get(account_slug)
+    services[service](app_context).restart()
+
+
+@parallel
+def stop(service, account_slug):
+    app_context = host_connections.get(account_slug)
+    services[service](app_context).stop()

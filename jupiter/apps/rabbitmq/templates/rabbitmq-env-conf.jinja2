@@ -7,6 +7,11 @@
 #   i.e.  export RABBITMQ_NODE_PORT=5672
 ## ##############################
 
+
+## ##############################
+# https://www.rabbitmq.com/clustering.html#issues-hostname
+USE_LONGNAME=true
+
 # ##########################
 # Defaults to the empty string
 #   meaning bind to all network interfaces
@@ -14,13 +19,14 @@
 # ##########################
 # NODE_IP_ADDRESS=
 NODE_PORT={{ rabbitmq_node_port }}
+DIST_PORT={{ rabbitmq_dist_port }}
 
 # ##########################
 # Unix, Linux: `env hostname`
 # MacOSX: `env hostname -s`
 # The name of the current machine
 # ##########################
-HOSTNAME={{ env.host_string }}
+HOSTNAME={{ hostname }}
 
 # ##########################
 # The name of the current machine

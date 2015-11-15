@@ -1,3 +1,7 @@
+from collections import OrderedDict
+from jupiter import utils
+
+
 class HostConnection(object):
     def __init__(self, hostname, name, port):
         self.name = name
@@ -12,16 +16,18 @@ class AppContext(object):
         self.app_name = app_name
 
         if host_connections is None:
-            self.host_connections = []
+            self.host_connections = OrderedDict()
         else:
             self.host_connections = host_connections
 
     def get_port(self, host_connection_name):
-        found = [x.port for x in self.host_connections if x.name == host_connection_name]
-        if not found:
-            return None
-        else:
+        curr_hostname = utils.hostname()
+        connections = self.host_connections.get(curr_hostname)
+        found = [c.port for c in connections if c.name == host_connection_name]
+        if found:
             return found[0]
+        else:
+            return None
 
 
 class App(object):
@@ -32,6 +38,7 @@ class App(object):
     def __init__(self, app_context=None):
         super(App, self).__init__()
         self.app_context = app_context
+        self.account_slug = self.app_context.account_slug
 
     def install(self):
         raise NotImplementedError()

@@ -10,8 +10,8 @@ class Ec2Package(App):
     def __init__(self):
         super(Ec2Package, self).__init__()
         self.tools_dir = 'tools'
-        run('mkdir -p {}'.format(self.tools_dir))
         self.ec2_metadata = '{}/{}'.format(self.tools_dir, 'ec2-metadata')
+        self.install_tools()
 
     def install(self):
         public_dns = self.get_public_dns()
@@ -34,13 +34,15 @@ class Ec2Package(App):
             print 'Rebooting to update hostname...'
             reboot()
 
-    def get_public_dns(self):
+    def install_tools(self):
+        run('mkdir -p {}'.format(self.tools_dir))
         with cd(self.tools_dir):
-            run('wget http://s3.amazonaws.com/ec2metadata/ec2-metadata')
+            run('wget -nc http://s3.amazonaws.com/ec2metadata/ec2-metadata')
             sudo('chmod +x ec2-metadata')
 
+    def get_public_dns(self):
         public_dns = run(
-            'curl -s http://169.254.169.254/latest/meta-data/public-hostname'
+            'curl -s http://instance-data/latest/meta-data/public-hostname'
         )
         print 'Found DNS: {}'.format(public_dns)
         return public_dns

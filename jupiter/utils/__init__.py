@@ -1,6 +1,8 @@
 import socket
 import uuid
 
+from fabric.api import env
+
 
 def next_port():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -14,9 +16,18 @@ def next_slug():
     return str(uuid.uuid4())[9:13]
 
 
-def hostname_short():
-    fqdn = socket.gethostname()
-    if fqdn and fqdn.split('.')[0]:
-        return fqdn.split('.')[0]
+def hostname():
+    host = env.host_string
+    if host:
+        return host
+    else:
+        return None
+
+
+def short_hostname(host=None):
+    if not host:
+        host = hostname()
+    if host and len(host.strip().split('.')) > 0:
+        return host.split('.')[0]
     else:
         return None
