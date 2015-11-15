@@ -9,7 +9,6 @@ from jupiter.apps.rabbitmq.package import RabbitMQApp
 from jupiter.aws import Ec2
 import logging
 
-
 logging.basicConfig()
 
 env.user = os.environ.get('FABRIC_USER')
@@ -71,8 +70,7 @@ def remote_uname():
 
 def bootstrap():
     from jupiter.apps.base import BaseDeployment
-    job = BaseDeployment()
-    job.install()
+    BaseDeployment().install()
 
     from jupiter.apps.ec2 import Ec2Package
     # May reboot to update hostname, do last
