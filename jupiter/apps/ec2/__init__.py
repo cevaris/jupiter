@@ -7,8 +7,8 @@ from jupiter.apps import App
 
 
 class Ec2Package(App):
-    def __init__(self):
-        super(Ec2Package, self).__init__()
+    def __init__(self, app_context):
+        App.__init__(self, app_context)
         self.tools_dir = 'tools'
         self.ec2_metadata = '{}/{}'.format(self.tools_dir, 'ec2-metadata')
         self.install_tools()

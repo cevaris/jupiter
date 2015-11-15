@@ -28,4 +28,6 @@ class BaseDeployment(App):
 
     def install(self):
         print 'Installing base package'
-        map(lambda package: package().install(), self.packages)
+        map(lambda package: package(self.app_context).install(), self.packages)
+
+        sudo('mkdir -p {}'.format(self.app_dir))

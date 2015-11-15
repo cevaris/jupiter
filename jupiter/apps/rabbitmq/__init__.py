@@ -1,11 +1,13 @@
-import hashlib
 import os
+
 import time
-from fabric.api import sudo, run, env, warn_only
+
+from fabric.api import env, sudo, run, warn_only
 from fabric.context_managers import cd
 from fabric.contrib import files
-from jupiter.apps import App
+
 from jupiter import utils
+from jupiter.apps import App
 
 
 class RabbitMQApp(App):
@@ -22,23 +24,19 @@ class RabbitMQApp(App):
         self.rabbitmq_node_port = self.app_context.get_port('rabbitmq_node_port')
         self.rabbitmq_dist_port = self.app_context.get_port('rabbitmq_dist_port')
 
-        # self.account_slug = 'abc2'
-        # self.rabbitmq_node_port = 22002
-        # self.rabbitmq_management_port = 22003
-
     def install(self):
-        sudo('yum install -y erlang')
-        self.erlang_cookie()
-
-        apps_dir = 'rabbitmq/{}'.format(self.account_slug)
-
-        run('mkdir -p {}'.format(apps_dir))
-        with cd(apps_dir):
+        install_dir = '{}/{}/{}'.format(self.app_dir, self.app_context.app_name, self.account_slug)
+        sudo('mkdir -p {}'.format(install_dir))
+        sudo('chown {} {}'.format(env.user, install_dir))
+        with cd(install_dir):
             run("wget -nc '{}'".format(self.url))
             run('tar xzf {}'.format(self.name))
 
+        sudo('yum install -y erlang')
+        self.erlang_cookie_config()
+
         self.rabbitmq_config()
-        self.rabbitmq_env()
+        self.rabbitmq_env_config()
 
         self.start()
         time.sleep(1)
@@ -65,7 +63,8 @@ class RabbitMQApp(App):
         self.start()
 
     def rabbitmq_dir(self):
-        return 'rabbitmq/{}/{}'.format(self.account_slug, self.folder)
+        return '{}/{}/{}/{}'.format(self.app_dir, self.app_context.app_name, self.account_slug, self.folder)
+        # return 'rabbitmq/{}/{}'.format(self.account_slug, self.folder)
 
     def rabbitmqctl(self, command, **kwargs):
         with cd(self.rabbitmq_dir()):
@@ -103,12 +102,13 @@ class RabbitMQApp(App):
         with cd(self.rabbitmq_dir()):
             run('sbin/rabbitmq-plugins enable rabbitmq_management')
 
-    def erlang_cookie(self):
+    def erlang_cookie_config(self):
         cookie = abs(hash('{}{}'.format(self.salt, self.account_slug)))
         context = {
             'cookie': cookie
         }
         with cd(self.rabbitmq_dir()):
+            sudo('touch ~/.erlang.cookie')
             files.upload_template(
                 'erlang-cookie.jinja2',
                 '~/.erlang.cookie',
@@ -125,15 +125,16 @@ class RabbitMQApp(App):
             'rabbitmq_management_port': self.rabbitmq_management_port
         }
         with cd(self.rabbitmq_dir()):
+            run('touch ./etc/rabbitmq/rabbitmq.config')
             files.upload_template(
                 'rabbitmq-config.jinja2',
-                'etc/rabbitmq/rabbitmq.config',
+                './etc/rabbitmq/rabbitmq.config',
                 context=context,
                 use_jinja=True,
                 template_dir=os.path.join(os.path.dirname(__file__), 'templates')
             )
 
-    def rabbitmq_env(self):
+    def rabbitmq_env_config(self):
         context = {
             'rabbitmq_node_port': self.rabbitmq_node_port,
             'rabbitmq_dist_port': self.rabbitmq_dist_port,
@@ -141,6 +142,7 @@ class RabbitMQApp(App):
             'hostname': utils.hostname(),
         }
         with cd(self.rabbitmq_dir()):
+            run('touch etc/rabbitmq/rabbitmq-env.conf')
             files.upload_template(
                 'rabbitmq-env-conf.jinja2',
                 'etc/rabbitmq/rabbitmq-env.conf',

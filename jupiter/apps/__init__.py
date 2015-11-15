@@ -11,7 +11,6 @@ class HostConnection(object):
 
 class AppContext(object):
     def __init__(self, account_slug, app_name, host_connections=None):
-        self.instances = 1
         self.account_slug = account_slug
         self.app_name = app_name
 
@@ -35,8 +34,9 @@ class App(object):
     :type app_context: AppContext
     """
 
-    def __init__(self, app_context=None):
+    def __init__(self, app_context):
         super(App, self).__init__()
+        self.app_dir = '/opt/apps'
         self.app_context = app_context
         self.account_slug = self.app_context.account_slug
 
