@@ -14,10 +14,16 @@ class LocatePackage(App):
         sudo('/etc/cron.daily/mlocate.cron')
 
 
+class IPythonPackage(App):
+    def install(self):
+        sudo('pip install ipython')
+
+
 class BaseDeployment(App):
     packages = [
         EmacsPackage,
-        LocatePackage
+        IPythonPackage,
+        LocatePackage,
     ]
 
     def install(self):

@@ -12,3 +12,11 @@ def next_port():
 
 def next_slug():
     return str(uuid.uuid4())[9:13]
+
+
+def hostname_short():
+    fqdn = socket.gethostname()
+    if fqdn and fqdn.split('.')[0]:
+        return fqdn.split('.')[0]
+    else:
+        return None

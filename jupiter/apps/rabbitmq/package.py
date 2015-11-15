@@ -1,10 +1,8 @@
 import os
 import time
-
 from fabric.api import sudo, run, env, warn_only
 from fabric.context_managers import cd
 from fabric.contrib import files
-
 from jupiter.apps import App
 
 
@@ -17,30 +15,33 @@ class RabbitMQApp(App):
     def __init__(self, app_context):
         App.__init__(self, app_context)
         self.account_slug = self.app_context.account_slug
-        self.rabbitmq_management_port = self.app_context.get_port('rabbitmq_management_port')
-        self.rabbitmq_node_port = self.app_context.get_port('rabbitmq_node_port')
+        # self.rabbitmq_management_port = self.app_context.get_port('rabbitmq_management_port')
+        # self.rabbitmq_node_port = self.app_context.get_port('rabbitmq_node_port')
 
         # self.account_slug = 'abc2'
         # self.rabbitmq_node_port = 22002
         # self.rabbitmq_management_port = 22003
 
     def install(self):
-        sudo('yum install -y erlang')
+        for index, host in enumerate(self.app_context.host_connections):
+            node_name = "{}{}".format(host)
 
-        user_dir = 'rabbitmq/{}'.format(self.account_slug)
+            sudo('yum install -y erlang')
 
-        run('mkdir -p {}'.format(user_dir))
-        with cd(user_dir):
-            run("wget -nc '{}'".format(self.url))
-            run('tar xzf {}'.format(self.name))
+            user_dir = 'rabbitmq/{}'.format(self.account_slug)
 
-        self.rabbitmq_config()
-        self.rabbitmq_env()
+            run('mkdir -p {}'.format(user_dir))
+            with cd(user_dir):
+                run("wget -nc '{}'".format(self.url))
+                run('tar xzf {}'.format(self.name))
 
-        self.start()
-        self.create_user(self.account_slug, '/', 'administrator')
-        self.enable_management()
-        self.restart()
+            self.rabbitmq_config()
+            self.rabbitmq_env()
+
+            self.start()
+            self.create_user(self.account_slug, '/', 'administrator')
+            self.enable_management()
+            self.restart()
 
     def start(self):
         with warn_only():
@@ -61,6 +62,19 @@ class RabbitMQApp(App):
     def rabbitmq_dir(self):
         return 'rabbitmq/{}/{}'.format(self.account_slug, self.folder)
 
+    def rabbitmqctl(self, command, warn_only=True):
+        with cd(self.rabbitmq_dir()):
+            run('sbin/rabbitmqctl {}'.format(command), warn_only)
+
+    def stop_app(self):
+        self.rabbitmqctl('stop_app')
+
+    def start_app(self):
+        self.rabbitmqctl('stop_app')
+
+    def cluster_status(self):
+        self.rabbitmqctl('cluster_status')
+
     def create_user(self, user, virtual_host, tag='customer'):
         with cd(self.rabbitmq_dir()):
             run('sbin/rabbitmqctl add_user {} pass'.format(user), warn_only=True)
@@ -68,6 +82,15 @@ class RabbitMQApp(App):
             run('sbin/rabbitmqctl set_permissions -p {} {} ".*" ".*" ".*"'.format(virtual_host, user))
             run('sbin/rabbitmqctl set_user_tags {} {}'.format(user, tag))
         self.restart()
+
+    def join_cluster(self):
+
+        self.start()
+        self.stop_app()
+        self.cluster_status()
+        self.rabbitmqctl('join_cluster {}'.format(join_node))
+        self.cluster_status()
+        self.start_app()
 
     def enable_management(self):
         with cd(self.rabbitmq_dir()):

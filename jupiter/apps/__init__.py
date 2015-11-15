@@ -29,7 +29,7 @@ class App(object):
     :type app_context: AppContext
     """
 
-    def __init__(self, app_context):
+    def __init__(self, app_context=None):
         super(App, self).__init__()
         self.app_context = app_context
 
