@@ -1,10 +1,10 @@
+from fabric.api import sudo, run
 from fabric.contrib import files
-from jupiter.utils import shell
 
 
 def upload_template(filename, destination, context=None, use_jinja=True,
                     template_dir=None, use_sudo=False, backup=True, mirror_local_mode=False,
-                    mode=None, pty=None, user_owner=None, group_owner=None):
+                    mode=None, pty=None, owners=None):
     files.upload_template(
         filename,
         destination,
@@ -17,5 +17,39 @@ def upload_template(filename, destination, context=None, use_jinja=True,
         mode=mode,
         pty=pty
     )
-    if user_owner or group_owner:
-        shell.chown(destination, user_owner=user_owner, group_owner=group_owner)
+    if owners:
+        chown(destination, owners)
+
+
+def chown(file_path, owners):
+    sudo('chown {} {}'.format(owners, file_path))
+
+
+def chmod(file_path, mode):
+    sudo('chmod {} {}'.format(mode, file_path))
+
+
+def mkdir(file_path, mode=None, owners=None, use_sudo=False):
+    if use_sudo:
+        sudo('mkdir -p {}'.format(file_path))
+    else:
+        run('mkdir -p {}'.format(file_path))
+
+    if mode:
+        chmod(file_path, mode)
+
+    if owners:
+        chown(file_path, owners)
+
+
+def touch(file_path, mode=None, owners=None, use_sudo=False):
+    if use_sudo:
+        sudo('touch {}'.format(file_path))
+    else:
+        run('touch {}'.format(file_path))
+
+    if mode:
+        chmod(file_path, mode)
+
+    if owners:
+        chown(file_path, owners)

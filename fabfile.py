@@ -72,10 +72,10 @@ datastore = {
 
 def aws():
     ec2 = Ec2()
-    # env.hosts = ec2.instances_dns_names()
+    env.hosts = ec2.instances_dns_names()
     # env.hosts = ['ec2-54-85-181-200.compute-1.amazonaws.com']
     # env.hosts = ['ec2-54-209-92-79.compute-1.amazonaws.com']
-    env.hosts = ['ec2-54-209-92-79.compute-1.amazonaws.com']
+    # env.hosts = ['ec2-54-209-92-79.compute-1.amazonaws.com']
     print env.hosts
     print 'Remote AWS Hosts'
     for host in env.hosts:
@@ -132,7 +132,7 @@ def stop(service, account_slug):
     services[service](app_context).stop()
 
 
-# @parallel
+@parallel
 def create_system_user():
     env.user = 'ec2-user'
     from jupiter.utils import ec2
