@@ -3,10 +3,6 @@ import uuid
 
 from fabric.api import env
 
-# from jupiter.utils.ec2 import Ec2Utils
-# from jupiter.utils.files import FilesUtils
-__all__ = ['ec2', 'files']
-
 
 def next_port():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -35,3 +31,6 @@ def short_hostname(host=None):
         return host.split('.')[0]
     else:
         return None
+
+
+__all__ = ['ec2', 'files']

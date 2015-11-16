@@ -18,7 +18,7 @@ class RabbitMQApp(App):
 
     def __init__(self, app_context):
         App.__init__(self, app_context)
-        self.node_name = "{}-{}".format(self.account_slug, utils.short_hostname())
+        self.node_name = "{}-{}".format(self.app_slug, utils.short_hostname())
         self.rabbitmq_management_port = self.app_context.get_port('rabbitmq_management_port')
         self.rabbitmq_node_port = self.app_context.get_port('rabbitmq_node_port')
         self.rabbitmq_dist_port = self.app_context.get_port('rabbitmq_dist_port')
@@ -35,7 +35,7 @@ class RabbitMQApp(App):
         time.sleep(1)
         self.start_app()
 
-        self.create_user(self.account_slug, '/', 'administrator')
+        self.create_user(self.app_slug, '/', 'administrator')
         self.enable_management()
         self.restart()
 
@@ -56,7 +56,7 @@ class RabbitMQApp(App):
         self.start()
 
     def rabbitmq_dir(self):
-        return '{}/{}/{}/{}'.format(self.app_dir, self.app_context.app_name, self.account_slug, self.folder)
+        return '{}/{}/{}/{}'.format(self.app_dir, self.app_context.app_name, self.app_slug, self.folder)
 
     def rabbitmqctl(self, command, **kwargs):
         with cd(self.rabbitmq_dir()):
@@ -84,7 +84,7 @@ class RabbitMQApp(App):
         self.cluster_status()
         cluster_hosts = self.app_context.host_connections.keys()
         cluster_hosts.remove(utils.hostname())
-        cluster_nodes = ['{}-{}@{}'.format(self.account_slug, utils.short_hostname(x), x) for x in cluster_hosts]
+        cluster_nodes = ['{}-{}@{}'.format(self.app_slug, utils.short_hostname(x), x) for x in cluster_hosts]
         for node in cluster_nodes:
             self.rabbitmqctl('join_cluster {}'.format(node), warn_only=True)
         self.cluster_status()
@@ -95,7 +95,7 @@ class RabbitMQApp(App):
             run('sbin/rabbitmq-plugins enable rabbitmq_management')
 
     def setup_app_dir(self):
-        install_dir = '{}/{}/{}'.format(self.app_dir, self.app_context.app_name, self.account_slug)
+        install_dir = '{}/{}/{}'.format(self.app_dir, self.app_context.app_name, self.app_slug)
         sudo('mkdir -p {}'.format(install_dir))
         sudo('chown {} {}'.format(env.user, install_dir))
         with cd(install_dir):
@@ -103,7 +103,7 @@ class RabbitMQApp(App):
             run('tar xzf {}'.format(self.name))
 
     def erlang_cookie_config(self):
-        cookie = abs(hash('erlang-cookie-{}'.format(self.account_slug)))
+        cookie = abs(hash('erlang-cookie-{}'.format(self.app_slug)))
         context = {
             'cookie': cookie
         }

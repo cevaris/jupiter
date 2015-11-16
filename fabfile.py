@@ -21,12 +21,8 @@ services = {
 }
 
 datastore = {
-    'system': AppContext(
-        account_slug='system',
-        app_name='system'
-    ),
     'xyz': AppContext(
-        account_slug='xyz',
+        app_slug='xyz',
         app_name='rabbitmq',
         host_connections=OrderedDict({
             'ec2-52-91-224-36.compute-1.amazonaws.com': [
@@ -47,7 +43,7 @@ datastore = {
         })
     ),
     'abc': AppContext(
-        account_slug='abc',
+        app_slug='abc',
         app_name='rabbitmq',
         host_connections=OrderedDict({
             'ec2-52-91-224-36.compute-1.amazonaws.com': [
@@ -90,45 +86,44 @@ def remote_uname():
     run('uname -a')
 
 
-# @parallel
-def bootstrap(account_slug=None):
-    print env.hosts
-    from jupiter.apps.base import BaseDeployment
+@parallel
+def bootstrap(app_slug=None):
+    app_context = AppContext()
 
-    app_context = datastore.get('system')
+    from jupiter.apps.base import BaseDeployment
     BaseDeployment(app_context).install()
 
-    from jupiter.utils.ec2 import Ec2Utils
-    if account_slug:
-        Ec2Utils.create_user(account_slug, sudoer=False)
+    if app_slug:
+        from jupiter.utils import ec2
+        ec2.create_user(app_slug, sudoer=False)
 
-    from jupiter.apps.ec2 import Ec2Package
     # May reboot to update hostname, do last
+    from jupiter.apps.ec2 import Ec2Package
     Ec2Package(app_context).install()
 
 
 # @parallel(pool_size=2)
 # @parallel
-def install(service, account_slug):
-    app_context = datastore.get(account_slug)
+def install(service, app_slug):
+    app_context = datastore.get(app_slug)
     services[service](app_context).install()
 
 
 @parallel
-def start(service, account_slug):
-    app_context = datastore.get(account_slug)
+def start(service, app_slug):
+    app_context = datastore.get(app_slug)
     services[service](app_context).start()
 
 
 @parallel
-def restart(service, account_slug):
-    app_context = datastore.get(account_slug)
+def restart(service, app_slug):
+    app_context = datastore.get(app_slug)
     services[service](app_context).restart()
 
 
 @parallel
-def stop(service, account_slug):
-    app_context = datastore.get(account_slug)
+def stop(service, app_slug):
+    app_context = datastore.get(app_slug)
     services[service](app_context).stop()
 
 

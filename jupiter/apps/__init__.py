@@ -10,8 +10,8 @@ class HostConnection(object):
 
 
 class AppContext(object):
-    def __init__(self, account_slug, app_name, host_connections=None):
-        self.account_slug = account_slug
+    def __init__(self, app_slug=None, app_name=None, host_connections=None):
+        self.app_slug = app_slug
         self.app_name = app_name
 
         if host_connections is None:
@@ -38,7 +38,7 @@ class App(object):
         super(App, self).__init__()
         self.app_dir = '/opt/apps'
         self.app_context = app_context
-        self.account_slug = self.app_context.account_slug
+        self.app_slug = self.app_context.app_slug
 
     def install(self):
         raise NotImplementedError()

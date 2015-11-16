@@ -16,7 +16,6 @@ class Ec2Package(App):
     def install(self):
         public_dns = self.get_public_dns()
         context = {'public_dns': public_dns}
-
         files.upload_template(
             'etc-sysconfig-network',
             '/etc/sysconfig/network',
@@ -26,13 +25,15 @@ class Ec2Package(App):
             template_dir=os.path.join(os.path.dirname(__file__), 'templates')
         )
 
-        hostname = run('hostname -f')
-        print 'Current hostname[{}]'.format(hostname)
+        curr_hostname = run('hostname -f')
+        print 'Current hostname[{}]'.format(curr_hostname)
         print 'Requested hostname[{}]'.format(public_dns)
 
-        if hostname.strip() != public_dns.strip():
+        if curr_hostname.strip() != public_dns.strip():
             print 'Rebooting to update hostname...'
             reboot()
+        else:
+            print 'Found updated hostname...no reboot'
 
     def install_tools(self):
         run('mkdir -p {}'.format(self.tools_dir))
