@@ -3,6 +3,10 @@ import uuid
 
 from fabric.api import env
 
+# from jupiter.utils.ec2 import Ec2Utils
+# from jupiter.utils.files import FilesUtils
+__all__ = ['ec2', 'files']
+
 
 def next_port():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

@@ -10,5 +10,6 @@ class Ec2(object):
         reservations = self.ec2_client.get_all_instances()
         for reservation in reservations:
             for instance in reservation.instances:
-                names.append(instance.dns_name)
+                if instance.dns_name:
+                    names.append(instance.dns_name)
         return names

@@ -15,7 +15,6 @@ class RabbitMQApp(App):
     name = 'rabbitmq-server-generic-unix-{0}.tar.gz'.format(version)
     folder = 'rabbitmq_server-{}'.format(version)
     url = 'https://www.rabbitmq.com/releases/rabbitmq-server/v{0}/{1}'.format(version, name)
-    salt = 'rmq-salt'
 
     def __init__(self, app_context):
         App.__init__(self, app_context)
@@ -25,13 +24,7 @@ class RabbitMQApp(App):
         self.rabbitmq_dist_port = self.app_context.get_port('rabbitmq_dist_port')
 
     def install(self):
-        install_dir = '{}/{}/{}'.format(self.app_dir, self.app_context.app_name, self.account_slug)
-        sudo('mkdir -p {}'.format(install_dir))
-        sudo('chown {} {}'.format(env.user, install_dir))
-        with cd(install_dir):
-            run("wget -nc '{}'".format(self.url))
-            run('tar xzf {}'.format(self.name))
-
+        self.setup_app_dir()
         sudo('yum install -y erlang')
         self.erlang_cookie_config()
 
@@ -64,7 +57,6 @@ class RabbitMQApp(App):
 
     def rabbitmq_dir(self):
         return '{}/{}/{}/{}'.format(self.app_dir, self.app_context.app_name, self.account_slug, self.folder)
-        # return 'rabbitmq/{}/{}'.format(self.account_slug, self.folder)
 
     def rabbitmqctl(self, command, **kwargs):
         with cd(self.rabbitmq_dir()):
@@ -102,8 +94,16 @@ class RabbitMQApp(App):
         with cd(self.rabbitmq_dir()):
             run('sbin/rabbitmq-plugins enable rabbitmq_management')
 
+    def setup_app_dir(self):
+        install_dir = '{}/{}/{}'.format(self.app_dir, self.app_context.app_name, self.account_slug)
+        sudo('mkdir -p {}'.format(install_dir))
+        sudo('chown {} {}'.format(env.user, install_dir))
+        with cd(install_dir):
+            run("wget -nc '{}'".format(self.url))
+            run('tar xzf {}'.format(self.name))
+
     def erlang_cookie_config(self):
-        cookie = abs(hash('{}{}'.format(self.salt, self.account_slug)))
+        cookie = abs(hash('erlang-cookie-{}'.format(self.account_slug)))
         context = {
             'cookie': cookie
         }

@@ -39,9 +39,9 @@ datastore = {
                 HostConnection('ec2-54-85-181-200.compute-1.amazonaws.com', 'rabbitmq_management_port', '55401'),
                 HostConnection('ec2-52-91-224-36.compute-1.amazonaws.com', 'rabbitmq_dist_port', '55402')
             ],
-            'ec2-54-85-52-212.compute-1.amazonaws.com': [
-                HostConnection('ec2-54-85-52-212.compute-1.amazonaws.com', 'rabbitmq_node_port', '55400'),
-                HostConnection('ec2-54-85-52-212.compute-1.amazonaws.com', 'rabbitmq_management_port', '55401'),
+            'ec2-54-209-92-79.compute-1.amazonaws.com': [
+                HostConnection('ec2-54-209-92-79.compute-1.amazonaws.com', 'rabbitmq_node_port', '55400'),
+                HostConnection('ec2-54-209-92-79.compute-1.amazonaws.com', 'rabbitmq_management_port', '55401'),
                 HostConnection('ec2-52-91-224-36.compute-1.amazonaws.com', 'rabbitmq_dist_port', '55402')
             ]
         })
@@ -60,9 +60,9 @@ datastore = {
                 HostConnection('ec2-54-85-181-200.compute-1.amazonaws.com', 'rabbitmq_management_port', '55411'),
                 HostConnection('ec2-52-91-224-36.compute-1.amazonaws.com', 'rabbitmq_dist_port', '55412')
             ],
-            'ec2-54-85-52-212.compute-1.amazonaws.com': [
-                HostConnection('ec2-54-85-52-212.compute-1.amazonaws.com', 'rabbitmq_node_port', '55410'),
-                HostConnection('ec2-54-85-52-212.compute-1.amazonaws.com', 'rabbitmq_management_port', '55411'),
+            'ec2-54-209-92-79.compute-1.amazonaws.com': [
+                HostConnection('ec2-54-209-92-79.compute-1.amazonaws.com', 'rabbitmq_node_port', '55410'),
+                HostConnection('ec2-54-209-92-79.compute-1.amazonaws.com', 'rabbitmq_management_port', '55411'),
                 HostConnection('ec2-52-91-224-36.compute-1.amazonaws.com', 'rabbitmq_dist_port', '55412')
             ]
         })
@@ -72,8 +72,11 @@ datastore = {
 
 def aws():
     ec2 = Ec2()
-    env.hosts = ec2.instances_dns_names()
+    # env.hosts = ec2.instances_dns_names()
     # env.hosts = ['ec2-54-85-181-200.compute-1.amazonaws.com']
+    # env.hosts = ['ec2-54-209-92-79.compute-1.amazonaws.com']
+    env.hosts = ['ec2-54-209-92-79.compute-1.amazonaws.com']
+    print env.hosts
     print 'Remote AWS Hosts'
     for host in env.hosts:
         print host
@@ -86,11 +89,18 @@ def local_uname():
 def remote_uname():
     run('uname -a')
 
-@parallel
-def bootstrap():
+
+# @parallel
+def bootstrap(account_slug=None):
+    print env.hosts
     from jupiter.apps.base import BaseDeployment
+
     app_context = datastore.get('system')
     BaseDeployment(app_context).install()
+
+    from jupiter.utils.ec2 import Ec2Utils
+    if account_slug:
+        Ec2Utils.create_user(account_slug, sudoer=False)
 
     from jupiter.apps.ec2 import Ec2Package
     # May reboot to update hostname, do last
@@ -120,3 +130,10 @@ def restart(service, account_slug):
 def stop(service, account_slug):
     app_context = datastore.get(account_slug)
     services[service](app_context).stop()
+
+
+# @parallel
+def create_system_user():
+    env.user = 'ec2-user'
+    from jupiter.utils import ec2
+    ec2.create_user('system', sudoer=True)
