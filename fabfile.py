@@ -1,12 +1,11 @@
 import logging
 import os
 from collections import OrderedDict
-
 import dotenv
 
 dotenv.read_dotenv()  # NOQA
 
-from fabric.api import env, run, local, parallel
+from fabric.api import env, run, local, parallel, sudo
 from jupiter.apps import AppContext, HostConnection
 from jupiter.apps.rabbitmq import RabbitMQApp
 from jupiter.aws import Ec2
@@ -23,7 +22,6 @@ services = {
 datastore = {
     'xyz': AppContext(
         app_slug='xyz',
-        app_name='rabbitmq',
         host_connections=OrderedDict({
             'ec2-52-91-224-36.compute-1.amazonaws.com': [
                 HostConnection('ec2-52-91-224-36.compute-1.amazonaws.com', 'rabbitmq_node_port', '55400'),
@@ -44,7 +42,6 @@ datastore = {
     ),
     'abc': AppContext(
         app_slug='abc',
-        app_name='rabbitmq',
         host_connections=OrderedDict({
             'ec2-52-91-224-36.compute-1.amazonaws.com': [
                 HostConnection('ec2-52-91-224-36.compute-1.amazonaws.com', 'rabbitmq_node_port', '55410'),
@@ -71,8 +68,6 @@ def aws():
     env.hosts = ec2.instances_dns_names()
     # env.hosts = ['ec2-54-85-181-200.compute-1.amazonaws.com']
     # env.hosts = ['ec2-54-209-92-79.compute-1.amazonaws.com']
-    # env.hosts = ['ec2-54-209-92-79.compute-1.amazonaws.com']
-    print env.hosts
     print 'Remote AWS Hosts'
     for host in env.hosts:
         print host
@@ -87,15 +82,11 @@ def remote_uname():
 
 
 @parallel
-def bootstrap(app_slug=None):
+def bootstrap():
     app_context = AppContext()
 
     from jupiter.apps.base import BaseDeployment
     BaseDeployment(app_context).install()
-
-    if app_slug:
-        from jupiter.utils import ec2
-        ec2.create_user(app_slug, sudoer=False)
 
     # May reboot to update hostname, do last
     from jupiter.apps.ec2 import Ec2Package
@@ -105,6 +96,9 @@ def bootstrap(app_slug=None):
 # @parallel(pool_size=2)
 # @parallel
 def install(service, app_slug):
+    from jupiter.utils import ec2
+    ec2.create_user(app_slug, sudoer=False)
+
     app_context = datastore.get(app_slug)
     services[service](app_context).install()
 
@@ -132,3 +126,9 @@ def create_system_user():
     env.user = 'ec2-user'
     from jupiter.utils import ec2
     ec2.create_user('system', sudoer=True)
+
+
+@parallel
+def reset_apps():
+    sudo('rm -rf /opt/apps/*')
+    bootstrap()

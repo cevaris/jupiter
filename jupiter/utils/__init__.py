@@ -1,7 +1,7 @@
 import socket
 import uuid
 
-from fabric.api import env
+from fabric.api import env, run, sudo
 
 
 def next_port():
@@ -31,6 +31,10 @@ def short_hostname(host=None):
         return host.split('.')[0]
     else:
         return None
+
+
+def run_as(command, user, **kwargs):
+    return sudo('su %s -c "%s"' % (user, command), **kwargs)
 
 
 __all__ = ['ec2', 'files']

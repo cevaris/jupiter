@@ -1,12 +1,9 @@
 import os
-
 import time
-
-from fabric.api import env, sudo, run, warn_only
+from fabric.api import env, sudo, run, warn_only, settings
 from fabric.context_managers import cd
-from fabric.contrib import files
-
 from jupiter import utils
+from jupiter.utils import file
 from jupiter.apps import App
 
 
@@ -18,13 +15,14 @@ class RabbitMQApp(App):
 
     def __init__(self, app_context):
         App.__init__(self, app_context)
+        self.app_name = 'rabbitmq'
         self.node_name = "{}-{}".format(self.app_slug, utils.short_hostname())
         self.rabbitmq_management_port = self.app_context.get_port('rabbitmq_management_port')
         self.rabbitmq_node_port = self.app_context.get_port('rabbitmq_node_port')
         self.rabbitmq_dist_port = self.app_context.get_port('rabbitmq_dist_port')
 
     def install(self):
-        self.setup_app_dir()
+        self.download_app()
         sudo('yum install -y erlang')
         self.erlang_cookie_config()
 
@@ -42,10 +40,10 @@ class RabbitMQApp(App):
         self.join_cluster()
 
     def start(self):
-        with warn_only():
-            with cd(self.rabbitmq_dir()):
-                run('sbin/rabbitmq-server -detached', pty=False)
-                time.sleep(1)
+        with cd(self.rabbitmq_dir()):
+            utils.run_as('sbin/rabbitmq-server -detached', self.app_slug, warn_only=True)
+
+        time.sleep(1)
 
     def stop(self):
         self.rabbitmqctl('stop', warn_only=True)
@@ -56,11 +54,11 @@ class RabbitMQApp(App):
         self.start()
 
     def rabbitmq_dir(self):
-        return '{}/{}/{}/{}'.format(self.app_dir, self.app_context.app_name, self.app_slug, self.folder)
+        return '{}/{}/{}/{}'.format(self.app_dir, self.app_name, self.app_slug, self.folder)
 
     def rabbitmqctl(self, command, **kwargs):
         with cd(self.rabbitmq_dir()):
-            run('sbin/rabbitmqctl {}'.format(command), **kwargs)
+            utils.run_as('sbin/rabbitmqctl {}'.format(command), user=self.app_slug, **kwargs)
 
     def stop_app(self):
         self.rabbitmqctl('stop_app')
@@ -74,7 +72,7 @@ class RabbitMQApp(App):
     def create_user(self, user, virtual_host, tag='customer'):
         self.rabbitmqctl('add_user {} pass'.format(user), warn_only=True)
         self.rabbitmqctl('add_vhost {}'.format(virtual_host), warn_only=True)
-        self.rabbitmqctl('set_permissions -p {} {} ".*" ".*" ".*"'.format(virtual_host, user))
+        self.rabbitmqctl("set_permissions -p {} {} '.*' '.*' '.*'".format(virtual_host, user))
         self.rabbitmqctl('set_user_tags {} {}'.format(user, tag))
 
     def join_cluster(self):
@@ -92,49 +90,49 @@ class RabbitMQApp(App):
 
     def enable_management(self):
         with cd(self.rabbitmq_dir()):
-            run('sbin/rabbitmq-plugins enable rabbitmq_management')
+            utils.run_as('sbin/rabbitmq-plugins enable rabbitmq_management', user=self.app_slug)
 
-    def setup_app_dir(self):
-        install_dir = '{}/{}/{}'.format(self.app_dir, self.app_context.app_name, self.app_slug)
-        sudo('mkdir -p {}'.format(install_dir))
-        sudo('chown {} {}'.format(env.user, install_dir))
+    def download_app(self):
+        install_dir = '{}/{}/{}'.format(self.app_dir, self.app_name, self.app_slug)
+        file.mkdir(install_dir, owners=self.owners)
         with cd(install_dir):
-            run("wget -nc '{}'".format(self.url))
-            run('tar xzf {}'.format(self.name))
+            file.wget(self.url, self.name, owners=self.owners)
+            file.tar_extract(self.name, self.folder, owners=self.owners)
 
     def erlang_cookie_config(self):
         cookie = abs(hash('erlang-cookie-{}'.format(self.app_slug)))
-        context = {
-            'cookie': cookie
-        }
-        with cd(self.rabbitmq_dir()):
-            sudo('touch ~/.erlang.cookie')
-            files.upload_template(
-                'erlang-cookie.jinja2',
-                '~/.erlang.cookie',
-                context=context,
-                use_jinja=True,
-                template_dir=os.path.join(os.path.dirname(__file__), 'templates'),
-                use_sudo=True,
-                backup=False,
-                mode='0400'
-            )
+        context = {'cookie': cookie}
+        cookie_path = '{}/.erlang.cookie'.format(self.home_dir)
+        file.touch(cookie_path, mode='0400', owners=self.owners)
+        file.upload_template(
+            'erlang-cookie.jinja2',
+            '{}/.erlang.cookie'.format(self.home_dir),
+            context=context,
+            template_dir=os.path.join(os.path.dirname(__file__), 'templates'),
+            use_sudo=True,
+            backup=False,
+            mode='0400',
+            owners=self.owners
+        )
 
     def rabbitmq_config(self):
+        config_path = './etc/rabbitmq/rabbitmq.config'
         context = {
             'rabbitmq_management_port': self.rabbitmq_management_port
         }
         with cd(self.rabbitmq_dir()):
-            run('touch ./etc/rabbitmq/rabbitmq.config')
-            files.upload_template(
+            file.touch(config_path, owners=self.owners)
+            file.upload_template(
                 'rabbitmq-config.jinja2',
-                './etc/rabbitmq/rabbitmq.config',
+                config_path,
                 context=context,
-                use_jinja=True,
-                template_dir=os.path.join(os.path.dirname(__file__), 'templates')
+                use_sudo=True,
+                template_dir=os.path.join(os.path.dirname(__file__), 'templates'),
+                owners=self.owners
             )
 
     def rabbitmq_env_config(self):
+        env_path = './etc/rabbitmq/rabbitmq-env.conf'
         context = {
             'rabbitmq_node_port': self.rabbitmq_node_port,
             'rabbitmq_dist_port': self.rabbitmq_dist_port,
@@ -142,11 +140,12 @@ class RabbitMQApp(App):
             'hostname': utils.hostname(),
         }
         with cd(self.rabbitmq_dir()):
-            run('touch etc/rabbitmq/rabbitmq-env.conf')
-            files.upload_template(
+            file.touch(env_path, owners=self.owners)
+            file.upload_template(
                 'rabbitmq-env-conf.jinja2',
-                'etc/rabbitmq/rabbitmq-env.conf',
+                env_path,
                 context=context,
-                use_jinja=True,
-                template_dir=os.path.join(os.path.dirname(__file__), 'templates')
+                use_sudo=True,
+                template_dir=os.path.join(os.path.dirname(__file__), 'templates'),
+                owners=self.owners
             )

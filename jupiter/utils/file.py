@@ -1,3 +1,5 @@
+import re
+
 from fabric.api import sudo, run
 from fabric.contrib import files
 
@@ -21,35 +23,46 @@ def upload_template(filename, destination, context=None, use_jinja=True,
         chown(destination, owners)
 
 
-def chown(file_path, owners):
-    sudo('chown {} {}'.format(owners, file_path))
+def chown(file_path, owners, recursive=False):
+    options = []
+    if recursive:
+        options.append('-R')
+    options = ' '.join(options)
+    sudo('chown {} {} {}'.format(options, owners, file_path))
 
 
-def chmod(file_path, mode):
-    sudo('chmod {} {}'.format(mode, file_path))
+def chmod(file_path, mode, recursive=False):
+    options = []
+    if recursive:
+        options.append('-R')
+    options = ' '.join(options)
+    sudo('chmod {} {} {}'.format(options, mode, file_path))
 
 
-def mkdir(file_path, mode=None, owners=None, use_sudo=False):
-    if use_sudo:
-        sudo('mkdir -p {}'.format(file_path))
-    else:
-        run('mkdir -p {}'.format(file_path))
-
+def update(file_path, mode=None, owners=None, recursive=False):
     if mode:
-        chmod(file_path, mode)
+        chmod(file_path, mode, recursive)
 
     if owners:
-        chown(file_path, owners)
+        chown(file_path, owners, recursive)
 
 
-def touch(file_path, mode=None, owners=None, use_sudo=False):
-    if use_sudo:
-        sudo('touch {}'.format(file_path))
-    else:
-        run('touch {}'.format(file_path))
+def wget(url, file_path, mode=None, owners=None):
+    if not files.exists(file_path):
+        sudo("wget -nc -O {} '{}'".format(file_path, url))
+    update(file_path, mode, owners)
 
-    if mode:
-        chmod(file_path, mode)
 
-    if owners:
-        chown(file_path, owners)
+def tar_extract(file_path, dest_dir, mode=None, owners=None):
+    sudo('tar xzf {}'.format(file_path))
+    update(dest_dir, mode, owners, True)
+
+
+def mkdir(file_path, mode=None, owners=None, recursive=False):
+    sudo('mkdir -p {}'.format(file_path))
+    update(file_path, mode, owners, recursive)
+
+
+def touch(file_path, mode=None, owners=None):
+    sudo('touch {}'.format(file_path))
+    update(file_path, mode, owners)

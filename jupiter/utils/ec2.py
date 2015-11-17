@@ -12,7 +12,7 @@ def create_user(app_slug, sudoer=False):
     default_owners = '{0}:{0}'.format(app_slug)
 
     with cd(home_dir):
-        file.mkdir('.ssh', owners=default_owners, mode='0700', use_sudo=True)
+        file.mkdir('.ssh', owners=default_owners, mode='0700')
 
         file.upload_template(
             'ssh-authorized-keys.jinja2',
