@@ -1,6 +1,4 @@
-import re
-
-from fabric.api import sudo, run
+from fabric.api import sudo
 from fabric.contrib import files
 
 

@@ -131,4 +131,5 @@ def create_system_user():
 @parallel
 def reset_apps():
     sudo('rm -rf /opt/apps/*')
+    sudo('killall beam', warn_only=True)
     bootstrap()

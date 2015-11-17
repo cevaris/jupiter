@@ -1,10 +1,12 @@
 import os
 import time
-from fabric.api import env, sudo, run, warn_only, settings
+
+from fabric.api import sudo
 from fabric.context_managers import cd
+
 from jupiter import utils
-from jupiter.utils import file
 from jupiter.apps import App
+from jupiter.utils import file
 
 
 class RabbitMQApp(App):
@@ -82,7 +84,7 @@ class RabbitMQApp(App):
         self.cluster_status()
         cluster_hosts = self.app_context.host_connections.keys()
         cluster_hosts.remove(utils.hostname())
-        cluster_nodes = ['{}-{}@{}'.format(self.app_slug, utils.short_hostname(x), x) for x in cluster_hosts]
+        cluster_nodes = ['{}@{}'.format(self.app_slug, x) for x in cluster_hosts]
         for node in cluster_nodes:
             self.rabbitmqctl('join_cluster {}'.format(node), warn_only=True)
         self.cluster_status()
@@ -136,7 +138,7 @@ class RabbitMQApp(App):
         context = {
             'rabbitmq_node_port': self.rabbitmq_node_port,
             'rabbitmq_dist_port': self.rabbitmq_dist_port,
-            'rabbitmq_node_name': self.node_name,
+            'rabbitmq_node_name': self.app_slug,
             'hostname': utils.hostname(),
         }
         with cd(self.rabbitmq_dir()):
