@@ -137,7 +137,7 @@ class RabbitMQApp(App):
         context = {
             'rabbitmq_node_port': self.rabbitmq_node_port,
             'rabbitmq_dist_port': self.rabbitmq_dist_port,
-            'rabbitmq_node_name': self.app_slug,
+            'rabbitmq_node_name': '{}@{}'.format(self.app_slug, utils.hostname()),
             'hostname': utils.hostname(),
         }
         with cd(self.rabbitmq_dir()):

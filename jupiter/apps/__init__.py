@@ -17,12 +17,12 @@ class AppContext(object):
         else:
             self.host_connections = host_connections
 
-    def get_port(self, host_connection_name):
+    def get_port(self, port_name):
         curr_hostname = utils.hostname()
         connections = self.host_connections.get(curr_hostname)
-        found = [c.port for c in connections if c.name == host_connection_name]
-        if found:
-            return found[0]
+        port = connections.get(port_name)
+        if port:
+            return port
         else:
             return None
 

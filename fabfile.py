@@ -1,12 +1,13 @@
 import logging
 import os
 from collections import OrderedDict
+
 import dotenv
 
 dotenv.read_dotenv()  # NOQA
 
 from fabric.api import env, run, local, parallel, sudo
-from jupiter.apps import AppContext, HostConnection
+from jupiter.apps import AppContext
 from jupiter.apps.rabbitmq import RabbitMQApp
 from jupiter.aws import Ec2
 
@@ -23,41 +24,41 @@ datastore = {
     'xyz': AppContext(
         app_slug='xyz',
         host_connections=OrderedDict({
-            'ec2-52-91-224-36.compute-1.amazonaws.com': [
-                HostConnection('rabbitmq_node_port', '55400'),
-                HostConnection('rabbitmq_management_port', '55401'),
-                HostConnection('rabbitmq_dist_port', '55402')
-            ],
-            'ec2-54-85-181-200.compute-1.amazonaws.com': [
-                HostConnection('rabbitmq_node_port', '55400'),
-                HostConnection('rabbitmq_management_port', '55401'),
-                HostConnection('rabbitmq_dist_port', '55402')
-            ],
-            'ec2-54-209-92-79.compute-1.amazonaws.com': [
-                HostConnection('rabbitmq_node_port', '55400'),
-                HostConnection('rabbitmq_management_port', '55401'),
-                HostConnection('rabbitmq_dist_port', '55402')
-            ]
+            'ec2-52-91-224-36.compute-1.amazonaws.com': {
+                'rabbitmq_node_port': '55400',
+                'rabbitmq_management_port': '55401',
+                'rabbitmq_dist_port': '55402',
+            },
+            'ec2-54-85-181-200.compute-1.amazonaws.com': {
+                'rabbitmq_node_port': '55400',
+                'rabbitmq_management_port': '55401',
+                'rabbitmq_dist_port': '55402',
+            },
+            'ec2-54-209-92-79.compute-1.amazonaws.com': {
+                'rabbitmq_node_port': '55400',
+                'rabbitmq_management_port': '55401',
+                'rabbitmq_dist_port': '55402',
+            }
         })
     ),
     'abc': AppContext(
         app_slug='abc',
         host_connections=OrderedDict({
-            'ec2-52-91-224-36.compute-1.amazonaws.com': [
-                HostConnection('rabbitmq_node_port', '55410'),
-                HostConnection('rabbitmq_management_port', '55411'),
-                HostConnection('rabbitmq_dist_port', '55412')
-            ],
-            'ec2-54-85-181-200.compute-1.amazonaws.com': [
-                HostConnection('rabbitmq_node_port', '55410'),
-                HostConnection('rabbitmq_management_port', '55411'),
-                HostConnection('rabbitmq_dist_port', '55412')
-            ],
-            'ec2-54-209-92-79.compute-1.amazonaws.com': [
-                HostConnection('rabbitmq_node_port', '55410'),
-                HostConnection('rabbitmq_management_port', '55411'),
-                HostConnection('rabbitmq_dist_port', '55412')
-            ]
+            'ec2-52-91-224-36.compute-1.amazonaws.com': {
+                'rabbitmq_node_port': '55410',
+                'rabbitmq_management_port': '55411',
+                'rabbitmq_dist_port': '55412'
+            },
+            'ec2-54-85-181-200.compute-1.amazonaws.com': {
+                'rabbitmq_node_port': '55410',
+                'rabbitmq_management_port': '55411',
+                'rabbitmq_dist_port': '55412'
+            },
+            'ec2-54-209-92-79.compute-1.amazonaws.com': {
+                'rabbitmq_node_port': '55410',
+                'rabbitmq_management_port': '55411',
+                'rabbitmq_dist_port': '55412'
+            }
         })
     )
 }
@@ -71,15 +72,6 @@ def aws():
     print 'Remote AWS Hosts'
     for host in env.hosts:
         print host
-
-
-def local_uname():
-    local('uname -a')
-
-
-def remote_uname():
-    run('uname -a')
-
 
 @parallel
 def bootstrap():
