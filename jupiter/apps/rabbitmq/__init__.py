@@ -39,9 +39,6 @@ class RabbitMQApp(App):
         self.restart()
 
     def post_install(self):
-        self.start()
-        time.sleep(1)
-        self.start_app()
         self.join_cluster()
 
     def start(self):
@@ -82,14 +79,23 @@ class RabbitMQApp(App):
 
     def join_cluster(self):
         self.start()
-
+        time.sleep(1)
         self.stop_app()
         self.cluster_status()
-        cluster_hosts = self.app_context.host_connections.keys()
-        cluster_hosts.remove(utils.hostname())
-        cluster_nodes = ['{}@{}'.format(self.app_slug, x) for x in cluster_hosts]
-        for node in cluster_nodes:
-            self.rabbitmqctl('join_cluster {}'.format(node), warn_only=True)
+
+        yes_cluster, no_cluster = self.app_context.cluster_nodes()
+        hostname = utils.hostname()
+        import ipdb; ipdb.set_trace()
+        if hostname in no_cluster:
+            self.stop_app()
+            self.rabbitmqctl('reset')
+            self.start_app()
+        else:
+            cluster_nodes = ['{}@{}'.format(self.app_slug, x) for x in yes_cluster]
+            for node in cluster_nodes:
+                if hostname not in node:
+                    self.rabbitmqctl('join_cluster {}'.format(node), warn_only=True)
+
         self.cluster_status()
         self.start_app()
 

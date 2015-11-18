@@ -7,7 +7,7 @@ import dotenv
 dotenv.read_dotenv()  # NOQA
 
 from fabric.api import env, parallel, sudo
-from jupiter.apps import AppContext
+from jupiter.apps import AppContext, ClusterNode
 from jupiter.apps.rabbitmq import RabbitMQApp
 from jupiter.aws import Ec2
 
@@ -25,16 +25,19 @@ datastore = {
         app_slug='xyz',
         host_connections=OrderedDict({
             'ec2-52-91-224-36.compute-1.amazonaws.com': {
+                'cluster_node': ClusterNode.Yes,
                 'rabbitmq_node_port': '55400',
                 'rabbitmq_management_port': '55401',
                 'rabbitmq_dist_port': '55402',
             },
             'ec2-54-85-181-200.compute-1.amazonaws.com': {
+                'cluster_node': ClusterNode.Yes,
                 'rabbitmq_node_port': '55400',
                 'rabbitmq_management_port': '55401',
                 'rabbitmq_dist_port': '55402',
             },
             'ec2-54-209-92-79.compute-1.amazonaws.com': {
+                'cluster_node': ClusterNode.Yes,
                 'rabbitmq_node_port': '55400',
                 'rabbitmq_management_port': '55401',
                 'rabbitmq_dist_port': '55402',

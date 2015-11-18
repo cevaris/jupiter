@@ -1,12 +1,13 @@
 from collections import OrderedDict
 
+from enum import Enum
+
 from jupiter import utils
 
 
-class HostConnection(object):
-    def __init__(self, name, port):
-        self.name = name
-        self.port = port
+class ClusterNode(Enum):
+    No = 0
+    Yes = 1
 
 
 class AppContext(object):
@@ -26,6 +27,17 @@ class AppContext(object):
             return port
         else:
             return None
+
+    def cluster_nodes(self):
+        yes_cluster = []
+        no_cluster = []
+        for hostname, config in self.host_connections.iteritems():
+            if config.get('cluster_node') == ClusterNode.Yes:
+                yes_cluster.append(hostname)
+            if config.get('cluster_node') == ClusterNode.No:
+                no_cluster.append(hostname)
+
+        return yes_cluster, no_cluster
 
 
 class App(object):
