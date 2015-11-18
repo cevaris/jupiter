@@ -1,4 +1,5 @@
 from collections import OrderedDict
+
 from jupiter import utils
 
 
@@ -42,6 +43,9 @@ class App(object):
         self.home_dir = '/home/{}'.format(self.app_slug)
 
     def install(self):
+        raise NotImplementedError()
+
+    def post_install(self):
         raise NotImplementedError()
 
     def start(self):

@@ -38,6 +38,10 @@ class RabbitMQApp(App):
         self.enable_management()
         self.restart()
 
+    def post_install(self):
+        self.start()
+        time.sleep(1)
+        self.start_app()
         self.join_cluster()
 
     def start(self):

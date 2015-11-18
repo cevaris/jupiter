@@ -6,7 +6,7 @@ import dotenv
 
 dotenv.read_dotenv()  # NOQA
 
-from fabric.api import env, run, local, parallel, sudo
+from fabric.api import env, parallel, sudo
 from jupiter.apps import AppContext
 from jupiter.apps.rabbitmq import RabbitMQApp
 from jupiter.aws import Ec2
@@ -73,6 +73,7 @@ def aws():
     for host in env.hosts:
         print host
 
+
 @parallel
 def bootstrap():
     app_context = AppContext()
@@ -86,13 +87,18 @@ def bootstrap():
 
 
 # @parallel(pool_size=2)
-# @parallel
+@parallel
 def install(service, app_slug):
     from jupiter.utils import ec2
     ec2.create_user(app_slug, sudoer=False)
 
     app_context = datastore.get(app_slug)
     services[service](app_context).install()
+
+
+def post_install(service, app_slug):
+    app_context = datastore.get(app_slug)
+    services[service](app_context).post_install()
 
 
 @parallel

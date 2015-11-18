@@ -1,7 +1,7 @@
 import socket
 import uuid
 
-from fabric.api import env, run, sudo
+from fabric.api import env, sudo
 
 
 def next_port():
