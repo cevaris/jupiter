@@ -24,19 +24,19 @@ datastore = {
         app_slug='xyz',
         host_connections=OrderedDict({
             'ec2-52-91-224-36.compute-1.amazonaws.com': [
-                HostConnection('ec2-52-91-224-36.compute-1.amazonaws.com', 'rabbitmq_node_port', '55400'),
-                HostConnection('ec2-52-91-224-36.compute-1.amazonaws.com', 'rabbitmq_management_port', '55401'),
-                HostConnection('ec2-52-91-224-36.compute-1.amazonaws.com', 'rabbitmq_dist_port', '55402')
+                HostConnection('rabbitmq_node_port', '55400'),
+                HostConnection('rabbitmq_management_port', '55401'),
+                HostConnection('rabbitmq_dist_port', '55402')
             ],
             'ec2-54-85-181-200.compute-1.amazonaws.com': [
-                HostConnection('ec2-54-85-181-200.compute-1.amazonaws.com', 'rabbitmq_node_port', '55400'),
-                HostConnection('ec2-54-85-181-200.compute-1.amazonaws.com', 'rabbitmq_management_port', '55401'),
-                HostConnection('ec2-52-91-224-36.compute-1.amazonaws.com', 'rabbitmq_dist_port', '55402')
+                HostConnection('rabbitmq_node_port', '55400'),
+                HostConnection('rabbitmq_management_port', '55401'),
+                HostConnection('rabbitmq_dist_port', '55402')
             ],
             'ec2-54-209-92-79.compute-1.amazonaws.com': [
-                HostConnection('ec2-54-209-92-79.compute-1.amazonaws.com', 'rabbitmq_node_port', '55400'),
-                HostConnection('ec2-54-209-92-79.compute-1.amazonaws.com', 'rabbitmq_management_port', '55401'),
-                HostConnection('ec2-52-91-224-36.compute-1.amazonaws.com', 'rabbitmq_dist_port', '55402')
+                HostConnection('rabbitmq_node_port', '55400'),
+                HostConnection('rabbitmq_management_port', '55401'),
+                HostConnection('rabbitmq_dist_port', '55402')
             ]
         })
     ),
@@ -44,19 +44,19 @@ datastore = {
         app_slug='abc',
         host_connections=OrderedDict({
             'ec2-52-91-224-36.compute-1.amazonaws.com': [
-                HostConnection('ec2-52-91-224-36.compute-1.amazonaws.com', 'rabbitmq_node_port', '55410'),
-                HostConnection('ec2-52-91-224-36.compute-1.amazonaws.com', 'rabbitmq_management_port', '55411'),
-                HostConnection('ec2-52-91-224-36.compute-1.amazonaws.com', 'rabbitmq_dist_port', '55412')
+                HostConnection('rabbitmq_node_port', '55410'),
+                HostConnection('rabbitmq_management_port', '55411'),
+                HostConnection('rabbitmq_dist_port', '55412')
             ],
             'ec2-54-85-181-200.compute-1.amazonaws.com': [
-                HostConnection('ec2-54-85-181-200.compute-1.amazonaws.com', 'rabbitmq_node_port', '55410'),
-                HostConnection('ec2-54-85-181-200.compute-1.amazonaws.com', 'rabbitmq_management_port', '55411'),
-                HostConnection('ec2-52-91-224-36.compute-1.amazonaws.com', 'rabbitmq_dist_port', '55412')
+                HostConnection('rabbitmq_node_port', '55410'),
+                HostConnection('rabbitmq_management_port', '55411'),
+                HostConnection('rabbitmq_dist_port', '55412')
             ],
             'ec2-54-209-92-79.compute-1.amazonaws.com': [
-                HostConnection('ec2-54-209-92-79.compute-1.amazonaws.com', 'rabbitmq_node_port', '55410'),
-                HostConnection('ec2-54-209-92-79.compute-1.amazonaws.com', 'rabbitmq_management_port', '55411'),
-                HostConnection('ec2-52-91-224-36.compute-1.amazonaws.com', 'rabbitmq_dist_port', '55412')
+                HostConnection('rabbitmq_node_port', '55410'),
+                HostConnection('rabbitmq_management_port', '55411'),
+                HostConnection('rabbitmq_dist_port', '55412')
             ]
         })
     )

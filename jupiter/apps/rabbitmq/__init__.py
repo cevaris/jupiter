@@ -18,7 +18,6 @@ class RabbitMQApp(App):
     def __init__(self, app_context):
         App.__init__(self, app_context)
         self.app_name = 'rabbitmq'
-        self.node_name = "{}-{}".format(self.app_slug, utils.short_hostname())
         self.rabbitmq_management_port = self.app_context.get_port('rabbitmq_management_port')
         self.rabbitmq_node_port = self.app_context.get_port('rabbitmq_node_port')
         self.rabbitmq_dist_port = self.app_context.get_port('rabbitmq_dist_port')

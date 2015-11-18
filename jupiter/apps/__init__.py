@@ -3,9 +3,8 @@ from jupiter import utils
 
 
 class HostConnection(object):
-    def __init__(self, hostname, name, port):
+    def __init__(self, name, port):
         self.name = name
-        self.hostname = hostname
         self.port = port
 
 
