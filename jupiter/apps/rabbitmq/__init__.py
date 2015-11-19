@@ -1,9 +1,7 @@
 import os
 import time
-
 from fabric.api import sudo
 from fabric.context_managers import cd
-
 from jupiter import utils
 from jupiter.apps import App
 from jupiter.utils import file
@@ -85,7 +83,6 @@ class RabbitMQApp(App):
 
         yes_cluster, no_cluster = self.app_context.cluster_nodes()
         hostname = utils.hostname()
-        import ipdb; ipdb.set_trace()
         if hostname in no_cluster:
             self.stop_app()
             self.rabbitmqctl('reset')
@@ -95,9 +92,12 @@ class RabbitMQApp(App):
             for node in cluster_nodes:
                 if hostname not in node:
                     self.rabbitmqctl('join_cluster {}'.format(node), warn_only=True)
-
+            self.start_app()
+            if len(yes_cluster) > 2:
+                self.rabbitmqctl(
+                    'set_policy ha-two "" \'{"ha-mode":"exactly","ha-params":2,"ha-sync-mode":"automatic"}\''
+                )
         self.cluster_status()
-        self.start_app()
 
     def enable_management(self):
         with cd(self.rabbitmq_dir()):
