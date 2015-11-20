@@ -4,11 +4,13 @@ from collections import OrderedDict
 
 import dotenv
 
+
 dotenv.read_dotenv()  # NOQA
 
 from fabric.api import env, parallel, sudo
 from jupiter.apps import AppContext, ClusterNode
 from jupiter.apps.rabbitmq import RabbitMQApp
+from jupiter.apps.redis import RedisApp
 from jupiter.aws import Ec2
 
 logging.basicConfig()
@@ -17,10 +19,20 @@ env.user = os.environ.get('FABRIC_USER')
 env.key_filename = os.environ.get('FABRIC_KEY_FILENAME')
 
 services = {
-    'rabbitmq': RabbitMQApp
+    'rabbitmq': RabbitMQApp,
+    'redis': RedisApp
 }
 
 datastore = {
+    'ijk': AppContext(
+        app_slug='ijk',
+        host_connections=OrderedDict({
+            'ec2-54-209-92-79.compute-1.amazonaws.com': {
+                'cluster_node': ClusterNode.Yes,
+                'redis_port': '55420',
+            },
+        })
+    ),
     'xyz': AppContext(
         app_slug='xyz',
         host_connections=OrderedDict({

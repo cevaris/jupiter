@@ -52,8 +52,7 @@ def wget(url, file_path, mode=None, owners=None):
 
 
 def tar_extract(file_path, dest_dir, mode=None, owners=None):
-    mkdir(dest_dir)
-    sudo('tar xzf {} -C {}'.format(file_path, dest_dir))
+    sudo('tar xzf {}'.format(file_path))
     update(dest_dir, mode, owners, True)
 
 

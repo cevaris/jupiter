@@ -8,8 +8,6 @@ from jupiter.utils import file
 
 
 class RabbitMQApp(App):
-    # https://s3.amazonaws.com/jupiter-apps/rabbitmq-3.5.6.zip
-
     version = '3.5.6'
     app_folder = 'rabbitmq-{}'.format(version)
     name = '{}.zip'.format(app_folder)
@@ -106,7 +104,6 @@ class RabbitMQApp(App):
             utils.run_as('sbin/rabbitmq-plugins enable rabbitmq_management', user=self.app_slug)
 
     def download_app(self):
-
         install_dir = '{}/{}'.format(self.app_root, self.app_slug)
         file.mkdir(install_dir, owners=self.owners)
         with cd(install_dir):
