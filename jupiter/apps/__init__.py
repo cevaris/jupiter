@@ -48,7 +48,7 @@ class App(object):
     def __init__(self, app_context):
         super(App, self).__init__()
         self.app_name = None
-        self.app_dir = '/opt/apps'
+        self.app_root = '/opt/apps'
         self.app_context = app_context
         self.app_slug = self.app_context.app_slug
         self.owners = '{0}:{0}'.format(self.app_slug)

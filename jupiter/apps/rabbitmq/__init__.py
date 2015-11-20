@@ -8,10 +8,12 @@ from jupiter.utils import file
 
 
 class RabbitMQApp(App):
+    # https://s3.amazonaws.com/jupiter-apps/rabbitmq-3.5.6.zip
+
     version = '3.5.6'
-    name = 'rabbitmq-server-generic-unix-{0}.tar.gz'.format(version)
-    folder = 'rabbitmq_server-{}'.format(version)
-    url = 'https://www.rabbitmq.com/releases/rabbitmq-server/v{0}/{1}'.format(version, name)
+    app_folder = 'rabbitmq-{}'.format(version)
+    name = '{}.zip'.format(app_folder)
+    url = 'https://s3.amazonaws.com/jupiter-apps/{}'.format(name)
 
     def __init__(self, app_context):
         App.__init__(self, app_context)
@@ -54,7 +56,7 @@ class RabbitMQApp(App):
         self.start()
 
     def rabbitmq_dir(self):
-        return '{}/{}/{}/{}'.format(self.app_dir, self.app_name, self.app_slug, self.folder)
+        return '{}/{}/{}'.format(self.app_root, self.app_slug, self.app_folder)
 
     def rabbitmqctl(self, command, **kwargs):
         with cd(self.rabbitmq_dir()):
@@ -104,11 +106,12 @@ class RabbitMQApp(App):
             utils.run_as('sbin/rabbitmq-plugins enable rabbitmq_management', user=self.app_slug)
 
     def download_app(self):
-        install_dir = '{}/{}/{}'.format(self.app_dir, self.app_name, self.app_slug)
+
+        install_dir = '{}/{}'.format(self.app_root, self.app_slug)
         file.mkdir(install_dir, owners=self.owners)
         with cd(install_dir):
             file.wget(self.url, self.name, owners=self.owners)
-            file.tar_extract(self.name, self.folder, owners=self.owners)
+            file.unzip(self.name, self.app_folder, owners=self.owners)
 
     def erlang_cookie_config(self):
         cookie = abs(hash('erlang-cookie-{}'.format(self.app_slug)))

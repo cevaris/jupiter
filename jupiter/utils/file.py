@@ -52,7 +52,13 @@ def wget(url, file_path, mode=None, owners=None):
 
 
 def tar_extract(file_path, dest_dir, mode=None, owners=None):
-    sudo('tar xzf {}'.format(file_path))
+    mkdir(dest_dir)
+    sudo('tar xzf {} -C {}'.format(file_path, dest_dir))
+    update(dest_dir, mode, owners, True)
+
+
+def unzip(file_path, dest_dir, mode=None, owners=None):
+    sudo('unzip -n {}'.format(file_path))
     update(dest_dir, mode, owners, True)
 
 

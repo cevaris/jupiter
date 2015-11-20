@@ -30,4 +30,4 @@ class BaseDeployment(App):
         print 'Installing base package'
         map(lambda package: package(self.app_context).install(), self.packages)
 
-        sudo('mkdir -p {}'.format(self.app_dir))
+        sudo('mkdir -p {}'.format(self.app_root))

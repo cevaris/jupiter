@@ -69,9 +69,9 @@ datastore = {
 
 def aws():
     ec2 = Ec2()
-    env.hosts = ec2.instances_dns_names()
+    # env.hosts = ec2.instances_dns_names()
+    env.hosts = ['ec2-54-209-92-79.compute-1.amazonaws.com']
     # env.hosts = ['ec2-54-85-181-200.compute-1.amazonaws.com']
-    # env.hosts = ['ec2-54-209-92-79.compute-1.amazonaws.com']
     print 'Remote AWS Hosts'
     for host in env.hosts:
         print host
@@ -90,7 +90,7 @@ def bootstrap():
 
 
 # @parallel(pool_size=2)
-@parallel
+# @parallel
 def install(service, app_slug):
     from jupiter.utils import ec2
     ec2.create_user(app_slug, sudoer=False)
