@@ -67,4 +67,5 @@ class App(object):
         raise NotImplementedError()
 
     def restart(self):
-        raise NotImplementedError()
+        self.stop()
+        self.start()

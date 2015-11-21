@@ -51,6 +51,17 @@ def wget(url, file_path, mode=None, owners=None):
     update(file_path, mode, owners)
 
 
+def rm(file_path, recursive=False, force=False):
+    options = []
+    if recursive:
+        options.append('-r')
+    if recursive:
+        options.append('-f')
+    options = ' '.join(options)
+    if files.exists(file_path):
+        sudo('rm {} {}'.format(options, file_path))
+
+
 def tar_extract(file_path, dest_dir, mode=None, owners=None):
     sudo('tar xzf {}'.format(file_path))
     update(dest_dir, mode, owners, True)
