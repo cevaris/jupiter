@@ -20,7 +20,10 @@ app_contexts = {
                 'cluster_node': ClusterNode.Yes,
                 'redis_port': '55420',
             },
-        })
+        }),
+        context={
+            'redis_requirepass': 'pass'
+        }
     ),
     'xyz': AppContext(
         app_slug='xyz',

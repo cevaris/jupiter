@@ -20,6 +20,7 @@ class RedisApp(App):
         self.app_name = 'redis'
         self.config_path = 'redis.conf'
         self.redis_port = self.app_context.get_port('redis_port')
+        self.redis_requirepass = self.app_context.get('redis_requirepass')
 
     def start(self):
         with cd(self.redis_dir()):
@@ -50,13 +51,12 @@ class RedisApp(App):
             file.unzip(self.name, self.app_folder, owners=self.owners)
 
     def redis_conf_file(self):
-        config_path = 'redis.conf'
         context = {
             'app_slug': self.app_slug,
-            'redis_port': self.redis_port
+            'redis_port': self.redis_port,
+            'requirepass': self.redis_requirepass
         }
         with cd(self.redis_dir()):
-            # file.touch(config_path, owners=self.owners)
             file.upload_template(
                 'redis.conf.jinja2',
                 self.config_path,

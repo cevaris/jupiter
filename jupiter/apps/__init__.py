@@ -11,13 +11,18 @@ class ClusterNode(Enum):
 
 
 class AppContext(object):
-    def __init__(self, app_slug=None, host_connections=None):
+    def __init__(self, app_slug=None, host_connections=None, context=None):
         self.app_slug = app_slug
 
         if host_connections is None:
             self.host_connections = OrderedDict()
         else:
             self.host_connections = host_connections
+
+        if context is None:
+            self.context = OrderedDict()
+        else:
+            self.context = context
 
     def get_port(self, port_name):
         curr_hostname = utils.hostname()
@@ -27,6 +32,9 @@ class AppContext(object):
             return port
         else:
             return None
+
+    def get(self, key):
+        return self.context.get(key)
 
     def cluster_nodes(self):
         yes_cluster = []
