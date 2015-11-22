@@ -1,8 +1,14 @@
-import logging
+import os
 
+import dotenv
 import pytest
 
-logger = logging.getLogger(__file__)
+dotenv.read_dotenv()  # NOQA
+
+from fabric.api import env
+
+env.user = os.environ.get('FABRIC_USER')
+env.key_filename = os.environ.get('FABRIC_KEY_FILENAME')
 
 
 class Config(object):

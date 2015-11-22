@@ -37,6 +37,7 @@ class RedisApp(App):
         self.redis_conf_file()
         with cd(self.redis_dir()):
             utils.run_as('make', user=self.app_slug)
+        self.start()
 
     def redis_dir(self):
         return '{}/{}/{}'.format(self.app_root, self.app_slug, self.app_folder)
