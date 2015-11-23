@@ -24,8 +24,11 @@ class AppContext(object):
         else:
             self.context = context
 
-    def get_port(self, port_name):
-        curr_hostname = utils.hostname()
+    def get_port(self, port_name, hostname=None):
+        if not hostname:
+            curr_hostname = utils.hostname()
+        else:
+            curr_hostname = hostname
         connections = self.host_connections.get(curr_hostname)
         port = connections.get(port_name)
         if port:

@@ -41,7 +41,7 @@ class RabbitMQApp(App):
 
     def start(self):
         with cd(self.rabbitmq_dir()):
-            utils.run_as('sbin/rabbitmq-server -detached', self.app_slug, warn_only=True)
+            utils.run_as('-c "sbin/rabbitmq-server -detached"', self.app_slug, warn_only=True)
 
         time.sleep(1)
 
@@ -93,9 +93,9 @@ class RabbitMQApp(App):
                 if hostname not in node:
                     self.rabbitmqctl('join_cluster {}'.format(node), warn_only=True)
             self.start_app()
-            if len(yes_cluster) > 2:
+            if len(yes_cluster) > 1:
                 self.rabbitmqctl(
-                    'set_policy ha-two "" \'{"ha-mode":"exactly","ha-params":2,"ha-sync-mode":"automatic"}\''
+                    """set_policy ha-two "" '{"ha-mode":"exactly","ha-params":2,"ha-sync-mode":"automatic"}'"""
                 )
         self.cluster_status()
 

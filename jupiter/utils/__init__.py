@@ -34,7 +34,7 @@ def short_hostname(host=None):
 
 
 def run_as(command, user, **kwargs):
-    return sudo('su %s -c "%s"' % (user, command), **kwargs)
+    return sudo('su %s - %s' % (user, command), **kwargs)
 
 
 __all__ = ['ec2', 'files']

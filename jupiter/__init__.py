@@ -13,7 +13,45 @@ apps = {
 }
 
 app_contexts = {
-    'ijk': AppContext(
+    'redis,robot': AppContext(
+        app_slug='robot',
+        host_connections=OrderedDict({
+            'ec2-54-209-92-79.compute-1.amazonaws.com': {
+                'cluster_node': ClusterNode.Yes,
+                'redis_port': '50000',
+            },
+        }),
+        context={
+            'redis_requirepass': 'robot-pass'
+        }
+    ),
+    'rabbitmq,robot': AppContext(
+        app_slug='robot',
+        host_connections=OrderedDict({
+            'ec2-52-91-224-36.compute-1.amazonaws.com': {
+                'cluster_node': ClusterNode.Yes,
+                'rabbitmq_node_port': '55000',
+                'rabbitmq_management_port': '55001',
+                'rabbitmq_dist_port': '55002',
+            },
+            'ec2-54-85-181-200.compute-1.amazonaws.com': {
+                'cluster_node': ClusterNode.Yes,
+                'rabbitmq_node_port': '55000',
+                'rabbitmq_management_port': '55001',
+                'rabbitmq_dist_port': '55002',
+            },
+            'ec2-54-209-92-79.compute-1.amazonaws.com': {
+                'cluster_node': ClusterNode.Yes,
+                'rabbitmq_node_port': '55000',
+                'rabbitmq_management_port': '55001',
+                'rabbitmq_dist_port': '55002',
+            }
+        }),
+        context={
+            'rabbitmq_pass': 'pass'
+        }
+    ),
+    'redis,ijk': AppContext(
         app_slug='ijk',
         host_connections=OrderedDict({
             'ec2-54-209-92-79.compute-1.amazonaws.com': {
@@ -25,7 +63,7 @@ app_contexts = {
             'redis_requirepass': 'pass'
         }
     ),
-    'xyz': AppContext(
+    'rabbitmq,xyz': AppContext(
         app_slug='xyz',
         host_connections=OrderedDict({
             'ec2-52-91-224-36.compute-1.amazonaws.com': {
@@ -48,7 +86,7 @@ app_contexts = {
             }
         })
     ),
-    'abc': AppContext(
+    'rabbitmq,abc': AppContext(
         app_slug='abc',
         host_connections=OrderedDict({
             'ec2-52-91-224-36.compute-1.amazonaws.com': {

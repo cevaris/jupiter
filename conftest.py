@@ -17,6 +17,7 @@ class Config(object):
 
 def pytest_addoption(parser):
     parser.addoption('--hosts', action='store', default=None, help='integration hosts')
+    parser.addoption('--init', action='store_true', default=False, help='initialize integration hosts')
 
 
 @pytest.fixture
